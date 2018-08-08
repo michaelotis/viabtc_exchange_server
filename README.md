@@ -95,7 +95,7 @@ matchengine
 
 **Using Docker**
 ```
-git clone 
+git clone https://github.com/Bringer-of-Light/viabtc_exchange_server.git
 cd viabtc_exchange_server/docker
 docker-compose up [opitional: service name]
 ```
