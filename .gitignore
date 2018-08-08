@@ -4,7 +4,9 @@ accessws/accessws
 alertcenter/alertcenter
 matchengine/matchengine
 marketprice/marketprice
-readhistroy/readhistory
+readhisttory/readhistory
+depends/hiredis/hiredis-test
+depends/hiredis/hiredis.pc
 
 # Compiled Object files
 *.slo
