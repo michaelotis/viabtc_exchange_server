@@ -11,6 +11,7 @@ RUN mkdir /run/mysqld
 RUN chown -R mysql.mysql /run/mysqld
 
 COPY entrypoint.sh docker-entrypoint.sh
+RUN ["chmod", "+x", "/docker-entrypoint.sh"]
 
 RUN mkdir /docker-entrypoint-initdb.d
 COPY init_trade_history.sh /docker-entrypoint-initdb.d

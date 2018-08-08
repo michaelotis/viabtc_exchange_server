@@ -83,7 +83,7 @@ Every process runs in deamon and starts with a watchdog process. It will automat
 ```
 matchengine
 |---bin
-|   |---matchengine.exe
+|   |---matchengine
 |---log
 |   |---matchengine.log
 |---conf
@@ -183,12 +183,12 @@ cd ..
 
 # copy all exe file into bin
 mkdir bin
-cp -f viabtc/accesshttp/accesshttp.exe bin
-cp -f viabtc/accessws/accessws.exe bin
-cp -f viabtc/matchengine/matchengine.exe bin
-cp -f viabtc/marketprice/marketprice.exe bin
-cp -f viabtc/alertcenter/alertcenter.exe bin
-cp -f viabtc/readhistory/readhistory.exe bin
+cp -f viabtc/accesshttp/accesshttp bin
+cp -f viabtc/accessws/accessws bin
+cp -f viabtc/matchengine/matchengine bin
+cp -f viabtc/marketprice/marketprice bin
+cp -f viabtc/alertcenter/alertcenter bin
+cp -f viabtc/readhistory/readhistory bin
 ll
 ```
 

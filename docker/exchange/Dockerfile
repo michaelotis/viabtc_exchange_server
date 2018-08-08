@@ -135,4 +135,6 @@ COPY --from=BUILDSTEP   /viabtc_exchange_server/accessws/accessws \
 COPY docker/exchange/configs/accessws.json /viabtc_exchange_server
 
 COPY docker/exchange/entrypoint.sh /docker-entrypoint.sh
+RUN ["chmod", "+x", "/docker-entrypoint.sh"]
+
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
