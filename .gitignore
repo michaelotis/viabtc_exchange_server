@@ -2,6 +2,7 @@ test/matchengine/cli
 accesshttp/accesshttp
 accessws/accessws
 alertcenter/alertcenter
+matchengine/matchengine
 marketprice/marketprice
 readhistroy/readhistory
 
