@@ -5,6 +5,7 @@ RUN apk add --no-cache redis
 
 COPY sentinel.conf /etc/redis/sentinel.conf
 COPY entrypoint.sh /docker-entrypoint.sh
+RUN ["chmod", "+x", "/docker-entrypoint.sh"]
 
 ENV PORT=26379
 ENV REDIS_PORT=6379

@@ -5,6 +5,8 @@ RUN apk add --no-cache redis
 
 COPY redis.conf /etc/redis/redis.conf
 COPY entrypoint.sh /docker-entrypoint.sh
+RUN ["chmod", "+x", "/docker-entrypoint.sh"]
+
 
 ENV PORT=6379
 ENV SLAVEOF=
