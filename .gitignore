@@ -4,7 +4,7 @@ accessws/accessws
 alertcenter/alertcenter
 matchengine/matchengine
 marketprice/marketprice
-readhisttory/readhistory
+readhistory/readhistory
 depends/hiredis/hiredis-test
 depends/hiredis/hiredis.pc
 
