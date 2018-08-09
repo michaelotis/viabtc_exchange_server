@@ -106,29 +106,29 @@ docker integration is merged from [ohld: testnet-exchange/viabtc_exchange_server
 ```
 #make a new folder and cd into it before you run these cmds
 
-apt update 
-apt install -y wget vim psmisc git
-apt install -y libev-dev libmpdec-dev  libmysqlclient-dev libssl-dev
-apt install -y build-essential autoconf libtool python 
+apt-get update 
+apt-get install -y wget vim psmisc git
+apt-get install -y libev-dev libmpdec-dev  libmysqlclient-dev libssl-dev
+apt-get install -y build-essential autoconf libtool python 
 
 # clear
 rm -rf /var/lib/apt/lists/* 
 
 #install jansson
 git clone https://github.com/akheron/jansson
-cd jansson
+cd ./jansson
 autoreconf -i
 ./configure
 make
 make install
-cd ..
+cd ../
 
 # install kafka
 wget --no-check-certificate https://codeload.github.com/edenhill/librdkafka/tar.gz/v0.11.3 -O  librdkafka.tar.gz 
 tar xzvf librdkafka.tar.gz 
 rm -rf librdkafka.tar.gz
 
-cd librdkafka-* 
+cd ./librdkafka-* 
 ./configure --prefix=/usr/local 
 sed -i "s/WITH_LDS=/#WITH_LDS=/g" Makefile.config 
 make 
@@ -140,7 +140,7 @@ wget --no-check-certificate https://codeload.github.com/curl/curl/tar.gz/curl-7_
 tar xzvf curl-7.45.0.tar.gz
 rm -rf curl-7.45.0.tar.gz
 mv curl-* curl
-cd curl
+cd ./curl
 ./buildconf
 ./configure --prefix=/usr/local --disable-ldap --disable-ldaps
 
@@ -151,14 +151,14 @@ make install
 cd ../
 
 # install liblz4
-apt update  
-apt install -y liblz4-dev 
+apt-get update  
+apt-get install -y liblz4-dev 
 
 # download viabtc
 git clone https://github.com/Bringer-of-Light/viabtc_exchange_server.git
 mv viabtc_exchange_server viabtc
 
-cd viabtc
+cd ./viabtc
 make -C depends/hiredis clean
 make -C network clean
 make -C utils clean
@@ -179,7 +179,7 @@ make -C matchengine
 make -C marketprice
 make -C alertcenter
 make -C readhistory
-cd ..
+cd ../
 
 # copy all exe file into bin
 mkdir bin
