@@ -8,6 +8,8 @@
 # include "ut_title.h"
 # include "ut_signal.h"
 
+
+const char *__process__ = "alertcenter";
 const char *version = "0.1.0";
 nw_timer cron_timer;
 
@@ -47,19 +49,20 @@ static int init_log(void)
 
 int main(int argc, char *argv[])
 {
-    printf("process: %s version: %s, compile date: %s %s\n", "blockmaster", version, __DATE__, __TIME__);
+    printf("process: %s version: %s, compile date: %s %s\n", __process__, version, __DATE__, __TIME__);
 
     if (argc != 2) {
         printf("usage: %s config.json\n", argv[0]);
         exit(EXIT_FAILURE);
     }
-    if (process_exist("alertcenter.exe") != 0) {
-        printf("process exist\n");
+
+    if (process_exist(__process__) != 0) {
+        printf("process: %s exist\n", __process__);
         exit(EXIT_FAILURE);
     }
 
     process_title_init(argc, argv);
-    process_title_set("alertcenter.exe");
+    process_title_set(__process__);
 
     int ret;
     ret = load_config(argv[1]);
