@@ -102,7 +102,8 @@ docker-compose up [opitional: service name]
 docker integration is merged from [ohld: testnet-exchange/viabtc_exchange_server](https://github.com/testnet-exchange/viabtc_exchange_server).
 
 
-**Manual compile on Ubuntu 14.04.5X64**
+**Manual compile on Ubuntu 14.04.5x64 and Ubuntu 16.04.5x64**
+warning: on ubuntu 16.04.5x64, you may need to use "apt" instead of "apt-get"
 ```
 #make a new folder and cd into it before you run these cmds
 
