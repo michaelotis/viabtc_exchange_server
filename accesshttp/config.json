@@ -25,6 +25,8 @@
     },
     "worker_num": 4,
     "timeout": 1.0,
+	"appkey":"123456",
+	"appsecret":"654321",
     "matchengine": {
         "name": "matchengine",
         "addr": [

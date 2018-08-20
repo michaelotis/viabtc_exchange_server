@@ -8,6 +8,8 @@ readhistory/readhistory
 depends/hiredis/hiredis-test
 depends/hiredis/hiredis.pc
 
+.vscode/
+
 # Compiled Object files
 *.slo
 *.lo
