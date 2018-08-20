@@ -3,22 +3,36 @@ MAINTAINER Sergey Dolin <sergey@s4y.solutions>
 
 # Install all necessary for building dependecnies, read more about
 # depencensies in readme section in the root of the repo.
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && apt-get install -y wget vim psmisc git libev-dev libmpdec-dev  libmysqlclient-dev libssl-dev \
-        build-essential autoconf libtool python\
-    && rm -rf /var/lib/apt/lists/* 
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y \
+      jq \
+      netcat \
+      inetutils-ping \
+      vim \
+      git \
+      wget \
+      make \
+      cmake \
+      gcc \
+      g++ \
+      python \
+      libev-dev \
+      libmpdec-dev \
+      libjansson-dev \
+      libssl-dev \
+      libgnutls-dev \
+      libmysqlclient-dev \
+      libhttp-parser-dev \
+      libcurl4-openssl-dev \
+			libldap2-dev \
+			libkrb5-dev \
+			libalberta-dev  \
+			libgss-dev \
+			libidn11-dev \
+			librtmp-dev &&\
+    rm -rf /var/lib/apt/lists/* 
 
-#install jansson
-RUN git clone https://github.com/akheron/jansson \
-    && cd ./jansson \
-    && autoreconf -i \
-    && ./configure \
-    && make \
-    && make install \
-    && cd ../
-
-#install kafka
 RUN git clone https://github.com/edenhill/librdkafka.git \
     && cd librdkafka \
     && ./configure \
@@ -26,18 +40,6 @@ RUN git clone https://github.com/edenhill/librdkafka.git \
     && make install \
     && cd / \
     && rm -rf librdkafka
-
-#install curl    
-RUN wget --no-check-certificate https://codeload.github.com/curl/curl/tar.gz/curl-7_45_0 -O curl-7.45.0.tar.gz \
-    && tar xzvf curl-7.45.0.tar.gz \
-    && rm -rf curl-7.45.0.tar.gz \
-    && mv curl-* curl \
-    && cd ./curl \
-    && ./buildconf \
-    && ./configure --prefix=/usr/local --disable-ldap --disable-ldaps \
-    && make \
-    && make install \
-    && cd ../    
 
 RUN mkdir viabtc_exchange_server
 
@@ -60,8 +62,9 @@ COPY makefile.inc                                   viabtc_exchange_server/makef
 # Do the actial build of the microservices.
 RUN cd viabtc_exchange_server/depends/hiredis \
     && make \
-    && make install \
-    && cd ../../
+    && mv libhiredis.* /usr/lib \
+    && cd .. \
+    && mv hiredis /usr/include
 
 RUN cd viabtc_exchange_server/network \
     && make
@@ -97,7 +100,6 @@ FROM ubuntu:16.04
 RUN apt-get update
 RUN apt-get upgrade -y
 RUN apt-get install -y \
-            liblz4-dev \
 			libldap-2.4 \
 			libgss3 \
 			librtmp1 \

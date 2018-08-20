@@ -74,6 +74,18 @@ static void reply_access_denied(nw_ses *ses, int64_t id, const char *message)
 
 static bool checkAccess(nw_ses *ses, json_t *params, int64_t id)
 {
+    //method start with "market." or "asset." doesn't need auth
+    const char *method = json_string_value(json_object_get(body, "method"));
+    if (!method) {
+        reply_bad_request(ses);
+        return false;
+    }
+
+    if (strstr(method, "market.") || strstr(method, "asset.")){
+        return true;
+    }
+
+    //all other api need auth
     if (3 > json_array_size(params)){
         reply_access_denied(ses, id, "at least 3 params is required");
         return false;
@@ -108,7 +120,7 @@ static bool checkAccess(nw_ses *ses, json_t *params, int64_t id)
 
     //caulate local sign
     unsigned char hash[20];
-    SHA1(presignStr, strlen(presignStr), hash);
+    SHA1((const unsigned char *)presignStr, strlen(presignStr), hash);
     free(presignStr);
     
     sds b4message;
@@ -140,7 +152,7 @@ static bool checkAccess(nw_ses *ses, json_t *params, int64_t id)
         return false;
     }
     const char *appkey = json_string_value(json_array_get(params, 0));
-    if (!appkey || (0!=strcmp(appkey, settings.appkey)){
+    if (!appkey || (0!=strcmp(appkey, settings.appkey))){
         reply_access_denied(ses, id, "appkey is not valid");
         return false;
     }
