@@ -81,7 +81,7 @@ static bool checkAccess(nw_ses *ses, json_t *params, int64_t id)
         return false;
     }
 
-    if (strstr(method, "market.") || strstr(method, "asset.")){
+    if (strstr(method, "asset.") || (strstr(method, "market.") && 0!=strcmp(method, "market.user_deals"))){
         return true;
     }
 
