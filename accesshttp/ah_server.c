@@ -72,10 +72,10 @@ static void reply_access_denied(nw_ses *ses, int64_t id, const char *message)
     reply_error(ses, id, 6, message, 401);
 }
 
-static bool checkAccess(nw_ses *ses, json_t *params, int64_t id)
+static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id)
 {
     //method start with "market." or "asset." doesn't need auth
-    const char *method = json_string_value(json_object_get(body, "method"));
+    const char *method = json_string_value(methodJ);
     if (!method) {
         reply_bad_request(ses);
         return false;
@@ -235,7 +235,7 @@ static int on_http_request(nw_ses *ses, http_request_t *request)
         info->ses_id = ses->id;
         info->request_id = json_integer_value(id);
 
-        if (!checkAccess(ses, params, info->request_id)){
+        if (!checkAccess(ses, method, params, info->request_id)){
             log_debug("access denied, body: %s", request->body);
             json_decref(body);
             return 0;
