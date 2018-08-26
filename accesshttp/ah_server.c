@@ -170,7 +170,7 @@ static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id
         reply_access_denied(ses, id, "timestamp is not valid");
         return false;
     }
-    json_int_t timestamp = json_integer_value(json_array_get(params, 0));
+    json_int_t timestamp = 1000*json_integer_value(json_array_get(params, 0));
     if (!timestamp){
         reply_access_denied(ses, id, "timestamp is not valid");
         return false;
@@ -178,7 +178,7 @@ static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id
     time_t localTime;
     time(&localTime);
     long offset = localTime - timestamp;
-    if (offset < -60 || offset > 300){
+    if (offset < -60000 || offset > 300000){
         reply_access_denied(ses, id, "timestamp is not valid");
         return false;
     }
