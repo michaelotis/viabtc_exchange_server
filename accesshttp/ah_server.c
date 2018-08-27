@@ -178,7 +178,7 @@ static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id
     time_t localTime;
     time(&localTime);
     long offset = localTime - timestamp;
-    if (offset < -60000 || offset > 300000){
+    if (offset < -60000 || offset > 60000){
         reply_access_denied(ses, id, "timestamp is not valid");
         return false;
     }
