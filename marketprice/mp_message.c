@@ -297,8 +297,6 @@ static json_t *send_market_list_req(void)
     json_object_set_new(request, "params", json_array());
     json_object_set_new(request, "id", json_integer(time(NULL)));
 
-    //TODO 接口鉴权
-
     char *request_data = json_dumps(request, 0);
     json_decref(request);
 
