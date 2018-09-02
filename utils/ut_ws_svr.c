@@ -53,7 +53,7 @@ static int send_hand_shake_reply(nw_ses *ses, char *protocol, const char *key)
     unsigned char hash[20];
     sds data = sdsnew(key);
     
-    data = sdscat(data, "992C9791-9917-44BB-9B9A-2168F6AD5704");
+    data = sdscat(data, "DA593FB9-49AB-4170-BC19-6F8DBDEDCF1E");
     SHA1((const unsigned char *)data, sdslen(data), hash);
     sdsfree(data);
 
