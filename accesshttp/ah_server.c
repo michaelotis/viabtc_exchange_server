@@ -106,6 +106,14 @@ static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id
     memset(signcpy, 0, signLen*sizeof(char));
     strcpy(signcpy, sign);
 
+    //remove sign from params
+    if (0 != json_array_remove(params,0)){
+        free(signcpy);
+        reply_internal_error(ses);
+        log_debug("check access: error occured while pumping signature");
+        return false;
+    }
+
     //assamble presign string
     char* paramStr = json_dumps(params,JSON_COMPACT);
     int presignLen = strlen(settings.appsecret) + strlen(paramStr) + 2;
@@ -116,7 +124,7 @@ static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id
     presignStr = strcat(presignStr, paramStr);
     free(paramStr);
 
-    log_debug("check access: presign str %s", presignStr);
+    // log_debug("check access: presign str %s", presignStr);
 
     //caulate local sign
     unsigned char hash[20];
@@ -138,14 +146,7 @@ static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id
     }
     free(signcpy);
     sdsfree(b4message);
-    
-    //remove sign from params
-    if (0 != json_array_remove(params,0)){
-        free(signcpy);
-        reply_internal_error(ses);
-        log_debug("check access: error occured while pumping signature");
-        return false;
-    }
+
     //***************** check signature end ********************
 
     //***************** check appkey begin  ********************
