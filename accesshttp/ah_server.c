@@ -104,12 +104,7 @@ static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id
     int signLen = strlen(sign)+1;
     char* signcpy = malloc(signLen*sizeof(char));
     memset(signcpy, 0, signLen*sizeof(char));
-    if (0 != strcpy(signcpy, sign)){
-        free(signcpy);
-        reply_internal_error(ses);
-        log_debug("check access: error occured while copying signature");
-        return false;
-    }
+    strcpy(signcpy, sign);
 
     //assamble presign string
     char* paramStr = json_dumps(params,JSON_COMPACT);
