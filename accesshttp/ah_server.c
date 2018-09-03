@@ -116,6 +116,8 @@ static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id
     presignStr = strcat(presignStr, paramStr);
     free(paramStr);
 
+    log_debug("check access: presign str %s", presignStr);
+
     //caulate local sign
     unsigned char hash[20];
     SHA1((const unsigned char *)presignStr, strlen(presignStr), hash);
@@ -185,7 +187,7 @@ static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id
     time(&localTime);
     long offset = localTime - timestamp;
     if (offset < -60000 || offset > 60000){
-        log_debug("access denied: timestamp doesn't match, server timestamp %d", localTime);
+        log_debug("access denied: timestamp doesn't match, server timestamp %ld", localTime);
         reply_access_denied(ses, id, "timestamp is not valid");
         return false;
     }
