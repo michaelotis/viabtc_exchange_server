@@ -296,6 +296,7 @@ static json_t *send_market_list_req(void)
     json_object_set_new(request, "method", json_string("market.list"));
     json_object_set_new(request, "params", json_array());
     json_object_set_new(request, "id", json_integer(time(NULL)));
+
     char *request_data = json_dumps(request, 0);
     json_decref(request);
 

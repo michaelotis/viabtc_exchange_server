@@ -1,3 +1,4 @@
+
 test/matchengine/cli
 accesshttp/accesshttp
 accessws/accessws
@@ -7,6 +8,7 @@ marketprice/marketprice
 readhistory/readhistory
 depends/hiredis/hiredis-test
 depends/hiredis/hiredis.pc
+
 .vscode/
 
 # Compiled Object files

@@ -3,8 +3,13 @@
  *     History: yang@haipo.me, 2017/04/21, create
  */
 
+# include <stdbool.h>
+# include <openssl/sha.h>
+
 # include "ah_config.h"
 # include "ah_server.h"
+# include "ut_base64.h"
+# include "ut_sds.h"
 
 static http_svr *svr;
 static nw_state *state;
@@ -62,6 +67,142 @@ static void reply_time_out(nw_ses *ses, int64_t id)
     reply_error(ses, id, 5, "service timeout", 504);
 }
 
+static void reply_access_denied(nw_ses *ses, int64_t id, const char *message)
+{
+    reply_error(ses, id, 6, message, 401);
+}
+
+static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id)
+{
+    //method start with "market." or "asset." doesn't need auth
+    const char *method = json_string_value(methodJ);
+    if (!method) {
+        reply_bad_request(ses);
+        return false;
+    }
+
+    if (strstr(method, "asset.") || (strstr(method, "market.") && 0!=strcmp(method, "market.user_deals"))){
+        return true;
+    }
+
+    //all other api need auth
+    if (3 > json_array_size(params)){
+        log_debug("access denied: at least 3 params is required");
+        reply_access_denied(ses, id, "at least 3 params is required");
+        return false;
+    }
+    
+    //***************** check signature begin ********************
+    if (!json_is_string(json_array_get(params, 0))){
+        log_debug("access denied: signature is not valid");
+        reply_access_denied(ses, id, "signature is not valid");
+        return false;
+    }
+
+    //copy signature from client
+    const char *sign = json_string_value(json_array_get(params, 0));
+    int signLen = strlen(sign)+1;
+    char* signcpy = malloc(signLen*sizeof(char));
+    memset(signcpy, 0, signLen*sizeof(char));
+    strcpy(signcpy, sign);
+
+    //remove sign from params
+    if (0 != json_array_remove(params,0)){
+        free(signcpy);
+        reply_internal_error(ses);
+        log_debug("check access: error occured while pumping signature");
+        return false;
+    }
+
+    //assamble presign string
+    char* paramStr = json_dumps(params,JSON_COMPACT);
+    int presignLen = strlen(settings.appsecret) + strlen(paramStr) + 2;
+    char* presignStr = malloc(presignLen * sizeof(char));
+    memset(presignStr, 0, presignLen * sizeof(char));
+
+    presignStr = strcat(presignStr, settings.appsecret);
+    presignStr = strcat(presignStr, paramStr);
+    free(paramStr);
+
+    // log_debug("check access: presign str %s", presignStr);
+
+    //caulate local sign
+    unsigned char hash[20];
+    SHA1((const unsigned char *)presignStr, strlen(presignStr), hash);
+    free(presignStr);
+    
+    sds b4message;
+    base64_encode(hash, sizeof(hash), &b4message);
+    char *localSign = b4message;
+
+    // compare signature
+    if (!localSign || (0!=strcmp(localSign, signcpy))){
+        log_debug("access denied: signature doesn't match, server signature %s", localSign);
+        reply_access_denied(ses, id, "signature doesn't match");
+        free(signcpy);
+        sdsfree(b4message);
+        
+        return false;
+    }
+    free(signcpy);
+    sdsfree(b4message);
+
+    //***************** check signature end ********************
+
+    //***************** check appkey begin  ********************
+    //check appkey
+    if (!json_is_string(json_array_get(params, 0))){
+        log_debug("access denied: appkey is not valid");
+        reply_access_denied(ses, id, "appkey is not valid");
+        return false;
+    }
+    const char *appkey = json_string_value(json_array_get(params, 0));
+    if (!appkey || (0!=strcmp(appkey, settings.appkey))){
+        log_debug("access denied: appkey doesn't match, server appkey %s", settings.appkey);
+        reply_access_denied(ses, id, "appkey is not valid");
+        return false;
+    }
+
+    //remove appkey from params
+    if (0 != json_array_remove(params,0)){
+        log_debug("check access: error occured while pumping appkey");
+        reply_internal_error(ses);
+        return false;
+    }
+    //***************** check appkey end  ********************
+
+    //***************** check timestamp begin  ********************
+    //check timestamp
+    if (!json_is_integer(json_array_get(params, 0))){
+        log_debug("access denied: timestamp is not valid");
+        reply_access_denied(ses, id, "timestamp is not valid");
+        return false;
+    }
+    json_int_t timestamp = json_integer_value(json_array_get(params, 0));
+    if (!timestamp){
+        log_debug("access denied: timestamp is not valid");
+        reply_access_denied(ses, id, "timestamp is not valid");
+        return false;
+    }
+    time_t localTime;
+    time(&localTime);
+    long offset = localTime - timestamp;
+    if (offset < -60 || offset > 120){
+        log_debug("access denied: timestamp doesn't match, server timestamp %ld", localTime);
+        reply_access_denied(ses, id, "timestamp doesn't match");
+        return false;
+    }
+    //remove timestamp from params
+    if (0 != json_array_remove(params,0)){
+        log_debug("check access: error occured while pumping timestamp");
+        reply_internal_error(ses);
+        return false;
+    }
+    //***************** check timestamp end  ********************
+
+    return true;
+}
+
 static int on_http_request(nw_ses *ses, http_request_t *request)
 {
     log_trace("new http request, url: %s, method: %u", request->url, request->method);
@@ -104,6 +245,12 @@ static int on_http_request(nw_ses *ses, http_request_t *request)
         info->ses = ses;
         info->ses_id = ses->id;
         info->request_id = json_integer_value(id);
+
+        if (!checkAccess(ses, method, params, info->request_id)){
+            log_debug("access denied, body: %s", request->body);
+            json_decref(body);
+            return 0;
+        }
 
         rpc_pkg pkg;
         memset(&pkg, 0, sizeof(pkg));

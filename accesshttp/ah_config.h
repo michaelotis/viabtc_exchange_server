@@ -50,6 +50,8 @@ struct settings {
     rpc_clt_cfg         readhistory;
     double              timeout;
     int                 worker_num;
+    char               *appkey;
+    char               *appsecret;
 };
 
 extern struct settings settings;
