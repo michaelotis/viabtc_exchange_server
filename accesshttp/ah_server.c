@@ -87,12 +87,14 @@ static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id
 
     //all other api need auth
     if (3 > json_array_size(params)){
+        log_debug("access denied: at least 3 params is required");
         reply_access_denied(ses, id, "at least 3 params is required");
         return false;
     }
     
     //***************** check signature begin ********************
     if (!json_is_string(json_array_get(params, 0))){
+        log_debug("access denied: signature is not valid");
         reply_access_denied(ses, id, "signature is not valid");
         return false;
     }
@@ -105,6 +107,7 @@ static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id
     if (0 != strcpy(signcpy, sign)){
         free(signcpy);
         reply_internal_error(ses);
+        log_debug("check access: error occured while copying signature");
         return false;
     }
 
@@ -129,9 +132,11 @@ static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id
 
     // compare signature
     if (!localSign || (0!=strcmp(localSign, signcpy))){
+        log_debug("access denied: signature doesn't match, server signature %s", localSign);
         reply_access_denied(ses, id, "signature doesn't match");
         free(signcpy);
         sdsfree(b4message);
+        
         return false;
     }
     free(signcpy);
@@ -141,6 +146,7 @@ static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id
     if (0 != json_array_remove(params,0)){
         free(signcpy);
         reply_internal_error(ses);
+        log_debug("check access: error occured while pumping signature");
         return false;
     }
     //***************** check signature end ********************
@@ -148,17 +154,20 @@ static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id
     //***************** check appkey begin  ********************
     //check appkey
     if (!json_is_string(json_array_get(params, 0))){
+        log_debug("access denied: appkey is not valid");
         reply_access_denied(ses, id, "appkey is not valid");
         return false;
     }
     const char *appkey = json_string_value(json_array_get(params, 0));
     if (!appkey || (0!=strcmp(appkey, settings.appkey))){
+        log_debug("access denied: appkey doesn't match, server appkey %s", settings.appkey);
         reply_access_denied(ses, id, "appkey is not valid");
         return false;
     }
 
     //remove appkey from params
     if (0 != json_array_remove(params,0)){
+        log_debug("check access: error occured while pumping appkey");
         reply_internal_error(ses);
         return false;
     }
@@ -167,11 +176,13 @@ static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id
     //***************** check timestamp begin  ********************
     //check timestamp
     if (!json_is_integer(json_array_get(params, 0))){
+        log_debug("access denied: timestamp is not valid");
         reply_access_denied(ses, id, "timestamp is not valid");
         return false;
     }
     json_int_t timestamp = 1000*json_integer_value(json_array_get(params, 0));
     if (!timestamp){
+        log_debug("access denied: timestamp is not valid");
         reply_access_denied(ses, id, "timestamp is not valid");
         return false;
     }
@@ -179,11 +190,13 @@ static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id
     time(&localTime);
     long offset = localTime - timestamp;
     if (offset < -60000 || offset > 60000){
+        log_debug("access denied: timestamp doesn't match, server timestamp %d", localTime);
         reply_access_denied(ses, id, "timestamp is not valid");
         return false;
     }
     //remove timestamp from params
     if (0 != json_array_remove(params,0)){
+        log_debug("check access: error occured while pumping timestamp");
         reply_internal_error(ses);
         return false;
     }
