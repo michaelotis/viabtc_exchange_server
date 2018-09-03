@@ -178,7 +178,7 @@ static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id
         reply_access_denied(ses, id, "timestamp is not valid");
         return false;
     }
-    json_int_t timestamp = 1000*json_integer_value(json_array_get(params, 0));
+    json_int_t timestamp = json_integer_value(json_array_get(params, 0));
     if (!timestamp){
         log_debug("access denied: timestamp is not valid");
         reply_access_denied(ses, id, "timestamp is not valid");
@@ -187,9 +187,9 @@ static bool checkAccess(nw_ses *ses, json_t *methodJ, json_t *params, int64_t id
     time_t localTime;
     time(&localTime);
     long offset = localTime - timestamp;
-    if (offset < -60000 || offset > 60000){
+    if (offset < -60 || offset > 120){
         log_debug("access denied: timestamp doesn't match, server timestamp %ld", localTime);
-        reply_access_denied(ses, id, "timestamp is not valid");
+        reply_access_denied(ses, id, "timestamp doesn't match");
         return false;
     }
     //remove timestamp from params
